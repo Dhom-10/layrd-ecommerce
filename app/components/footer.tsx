@@ -1,47 +1,81 @@
 import Link from "next/link";
-import { CgFacebook, CgInstagram } from "react-icons/cg";
+import { PiInstagramLogo, PiShareNetwork } from "react-icons/pi";
+import { FaCcVisa, FaCcMastercard, FaCcPaypal, FaCcApplePay, FaGooglePay } from "react-icons/fa";
+
+const paymentIcons = [
+  { Icon: FaCcVisa, label: "Visa" },
+  { Icon: FaCcMastercard, label: "Mastercard" },
+  { Icon: FaCcPaypal, label: "PayPal" },
+  { Icon: FaCcApplePay, label: "Apple Pay" },
+  { Icon: FaGooglePay, label: "Google Pay" },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white px-8 py-12 mt-16">
-      <div className="grid grid-cols-4 gap-8 max-w-6xl mx-auto">
-        <div>
-          <h2 className="text-2xl tracking-[4px] font-bold mb-3">LÄYRD</h2>
-          <p className="text-sm text-gray-300">
+    <footer className="bg-black text-light px-6 sm:px-20 pt-12 pb-8">
+      <div className="max-w-[1280px] mx-auto grid gap-10 md:grid-cols-[338px_1fr]">
+        {/* Logo + tagline */}
+        <div className="text-center md:text-center">
+          <p className="text-[56px] sm:text-[72px] leading-none tracking-[0.12em] text-white">LÄYRD</p>
+          <p className="mt-6 text-base font-medium tracking-[0.05em] text-placeholder">
             Espresso Shots &amp; Cake-in-a-Can.
             <br />
             Made fresh. Kept simple.
           </p>
         </div>
 
-        <FooterColumn
-          title="Support"
-          links={["Shipping", "Request Refund", "Contact Us", "Wholesale"]}
-        />
-        <FooterColumn
-          title="Information"
-          links={["FAQ", "About LÄYRD", "Privacy Policy", "Terms of Service", "Community"]}
-        />
-
-        <div>
-          <h4 className="text-gold font-bold text-sm mb-3 tracking-wide">OUR NEWSLETTER</h4>
-          <p className="text-xs text-gray-300 mb-3">
-            Join our newsletter to receive exclusive announcements, and offers!
-          </p>
-          <input
-            type="email"
-            placeholder="Email Address"
-            className="w-full bg-transparent border border-gray-600 text-sm px-3 py-2 mb-2"
+        {/* Link columns */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-12 md:justify-self-end">
+          <FooterColumn title="SUPPORT" links={["Shipping", "Request Refund", "Contact Us", "Wholesale"]} />
+          <FooterColumn
+            title="INFORMATION"
+            links={["FAQ", "About LÄYRD", "Privacy Policy", "Terms of Service", "Community"]}
           />
-          <button className="text-xs tracking-wide underline">SUBSCRIBE</button>
+
+          <div className="col-span-2 sm:col-span-1">
+            <h4 className="text-gold font-semibold text-xl tracking-[0.05em]">OUR NEWSLETTER</h4>
+            <p className="mt-6 text-xs leading-5 font-medium tracking-[0.05em] underline max-w-[213px]">
+              Join our newsletter to receive exclusive announcements, and offers !
+            </p>
+            <form className="mt-3" action="#">
+              <label htmlFor="newsletter-email" className="sr-only">
+                Email Address
+              </label>
+              <input
+                id="newsletter-email"
+                type="email"
+                placeholder="Email Address"
+                className="w-[208px] h-[27px] bg-transparent border border-light text-xs px-2 placeholder:text-placeholder"
+              />
+              <button type="submit" className="block mt-1 text-xs leading-5 font-medium tracking-[0.05em]">
+                SUBSCRIBE
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto flex justify-between items-center mt-12 pt-6 border-t border-gray-700 text-xs text-gray-400">
-        <span>©2026 LÄYRD. ALL RIGHTS RESERVED.</span>
-        <div className="flex gap-4 text-lg">
-          <CgFacebook />
-          <CgInstagram />
+      {/* Bottom row */}
+      <div className="max-w-[1280px] mx-auto mt-12 flex flex-col md:flex-row gap-6 md:gap-0 items-center justify-between">
+        <span className="text-base font-medium tracking-[0.05em] text-placeholder">
+          ©2026 LÄYRD. ALL RIGHTS RESERVED.
+        </span>
+
+        <ul className="flex gap-3 text-white text-[40px]" aria-label="Payment methods">
+          {paymentIcons.map(({ Icon, label }) => (
+            <li key={label} title={label}>
+              <Icon aria-label={label} />
+            </li>
+          ))}
+        </ul>
+
+        <div className="flex gap-2 text-gold text-[34px]">
+          <button aria-label="Share">
+            <PiShareNetwork />
+          </button>
+          <a href="https://www.instagram.com/l.a.y.r.d" target="_blank" rel="noreferrer" aria-label="Instagram">
+            <PiInstagramLogo />
+          </a>
         </div>
       </div>
     </footer>
@@ -51,11 +85,11 @@ export default function Footer() {
 function FooterColumn({ title, links }: { title: string; links: string[] }) {
   return (
     <div>
-      <h4 className="text-gold font-bold text-sm mb-3 tracking-wide">{title.toUpperCase()}</h4>
-      <ul className="space-y-2">
+      <h4 className="text-gold font-semibold text-xl tracking-[0.05em]">{title}</h4>
+      <ul className="mt-6">
         {links.map((link) => (
           <li key={link}>
-            <Link href="#" className="text-sm text-gray-300 underline">
+            <Link href="#" className="text-xs leading-5 font-medium tracking-[0.05em] underline hover:text-gold">
               {link}
             </Link>
           </li>

@@ -3,6 +3,7 @@
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
 import Header from "@/app/components/Header";
+import Footer from "@/app/components/footer";
 import { CgTrash } from "react-icons/cg";
 
 export default function CartPage() {
@@ -48,19 +49,22 @@ export default function CartPage() {
 
             {items.map((item) => (
               <div
-                key={item.product.productID}
+                key={`${item.product.productID}-${item.size ?? ""}`}
                 className="flex items-center justify-between border-b border-border py-4"
               >
                 <div className="flex items-center gap-4 w-1/3">
                   <div className="w-16 h-16 bg-gray-100 flex-shrink-0">
                     <img src={item.product.imageUrl} alt={item.product.name} className="w-full h-full object-cover" />
                   </div>
-                  <p className="font-semibold text-sm">{item.product.name}</p>
+                  <div>
+                    <p className="font-semibold text-sm">{item.product.name}</p>
+                    {item.size && <p className="text-xs text-gray">Size: {item.size}</p>}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => decreaseQuantity(item.product.productID)}
+                    onClick={() => decreaseQuantity(item.product.productID, item.size)}
                     className="border border-border w-6 h-6 flex items-center justify-center text-sm"
                     aria-label="Decrease quantity"
                   >
@@ -68,14 +72,14 @@ export default function CartPage() {
                   </button>
                   <span className="text-sm w-4 text-center">{item.quantity}</span>
                   <button
-                    onClick={() => increaseQuantity(item.product.productID)}
+                    onClick={() => increaseQuantity(item.product.productID, item.size)}
                     className="border border-border w-6 h-6 flex items-center justify-center text-sm"
                     aria-label="Increase quantity"
                   >
                     +
                   </button>
                   <button
-                    onClick={() => removeItem(item.product.productID)}
+                    onClick={() => removeItem(item.product.productID, item.size)}
                     aria-label="Remove item"
                     className="text-lg text-gray hover:text-black ml-2"
                   >
@@ -122,6 +126,7 @@ export default function CartPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }

@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
+/* LÄYRD brand colors — from the "Style" frame in the Figma file */
 :root {
   --background: #ffffff;
-  --foreground: #000000;
-  --gold: #c9a227;
+  --foreground: #1c1c1c; /* Text coloring */
+  --gold: #d4af37; /* Gold accents */
+  --light: #e5e5e5; /* Contrast text on black backgrounds */
+  --placeholder: #b3b3b3; /* Placeholder text for fields */
+  --announce: #fbbc05; /* Announcement bar + "POPULAR" tag text */
   --gray: #4b4b4b;
   --border-color: #e5e5e5;
 }
@@ -11,10 +15,15 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ink: var(--foreground);
   --color-gold: var(--gold);
+  --color-light: var(--light);
+  --color-placeholder: var(--placeholder);
+  --color-announce: var(--announce);
   --color-gray: var(--gray);
   --color-border: var(--border-color);
   --font-sans: var(--font-montserrat);
+  --radius-card: 15px; /* "Corner Radius - 15" in the style guide */
 }
 
 body {
