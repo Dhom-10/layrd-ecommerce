@@ -21,6 +21,8 @@ export interface Product {
   sizes?: string[];
   /** Days added to the catalog, used for "Newest" sorting (lower = newer) */
   addedOrder: number;
+  /** Units in stock (from the database) */
+  stock?: number;
 }
 
 export interface User {
@@ -46,4 +48,34 @@ export interface CartItem {
 export interface Cart {
   cartId: number;
   items: CartItem[];
+}
+
+export type DeliveryMethod = "delivery" | "pickup";
+
+export type OrderStatus = "pending_payment" | "processing" | "out_for_delivery" | "delivered" | "cancelled";
+
+export type PaymentStatus = "unpaid" | "paid" | "test_paid";
+
+export interface OrderItem {
+  productId: number | null;
+  name: string;
+  size: string | null;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface OrderSummary {
+  id: number;
+  orderNumber: string;
+  createdAt: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  deliveryMethod: DeliveryMethod;
+  customerName: string;
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+  items: OrderItem[];
 }

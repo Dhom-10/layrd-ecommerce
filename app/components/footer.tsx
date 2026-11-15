@@ -82,6 +82,8 @@ export default function Footer() {
   );
 }
 
+const footerLinks: Record<string, string> = { Wholesale: "/wholesale/login" };
+
 function FooterColumn({ title, links }: { title: string; links: string[] }) {
   return (
     <div>
@@ -89,7 +91,7 @@ function FooterColumn({ title, links }: { title: string; links: string[] }) {
       <ul className="mt-6">
         {links.map((link) => (
           <li key={link}>
-            <Link href="#" className="text-xs leading-5 font-medium tracking-[0.05em] underline hover:text-gold">
+            <Link href={footerLinks[link] ?? "#"} className="text-xs leading-5 font-medium tracking-[0.05em] underline hover:text-gold">
               {link}
             </Link>
           </li>

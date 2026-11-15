@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { CartItem, Product } from "@/types/models";
 
 interface CartContextType {
@@ -11,7 +11,12 @@ interface CartContextType {
   increaseQuantity: (productID: number, size?: string) => void;
   decreaseQuantity: (productID: number, size?: string) => void;
   getTotal: () => number;
+  clearCart: () => void;
+  /** false until the saved cart has been read from the browser */
+  ready: boolean;
 }
+
+const STORAGE_KEY = "layrd-cart";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -22,6 +27,32 @@ function isSameLine(item: CartItem, productID: number, size?: string) {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [ready, setReady] = useState(false);
+
+  // Keep the cart when the page reloads or the customer comes back from payment
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reading browser storage after mount
+      if (saved) setItems(JSON.parse(saved));
+    } catch {
+      // storage blocked or bad data: start with an empty cart
+    }
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      // storage full or blocked: the cart still works for this visit
+    }
+  }, [items, ready]);
+
+  function clearCart() {
+    setItems([]);
+  }
 
   function addItem(product: Product, quantity = 1, size?: string) {
     setItems((prevItems) => {
@@ -63,7 +94,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, itemCount, addItem, removeItem, increaseQuantity, decreaseQuantity, getTotal }}
+      value={{ items, itemCount, addItem, removeItem, increaseQuantity, decreaseQuantity, getTotal, clearCart, ready }}
     >
       {children}
     </CartContext.Provider>

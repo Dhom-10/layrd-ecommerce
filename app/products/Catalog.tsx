@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { PiCaretDown } from "react-icons/pi";
 import ProductTag from "@/app/components/ProductTag";
-import { products } from "@/lib/data";
 import { Category, Flavor, Product } from "@/types/models";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name";
@@ -37,7 +36,7 @@ function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
-export default function Catalog({ initialCategory }: { initialCategory?: Category }) {
+export default function Catalog({ products, initialCategory }: { products: Product[]; initialCategory?: Category }) {
   const [categories, setCategories] = useState<(Category | "limited")[]>(initialCategory ? [initialCategory] : []);
   const [prices, setPrices] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState("");
@@ -69,7 +68,7 @@ export default function Catalog({ initialCategory }: { initialCategory?: Categor
       if (sort === "name") return a.name.localeCompare(b.name);
       return a.addedOrder - b.addedOrder;
     });
-  }, [categories, prices, minPrice, maxPrice, sizes, flavors, sort]);
+  }, [products, categories, prices, minPrice, maxPrice, sizes, flavors, sort]);
 
   const hasFilters =
     categories.length + prices.length + sizes.length + flavors.length > 0 || minPrice !== "" || maxPrice !== "";
