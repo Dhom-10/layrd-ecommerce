@@ -44,6 +44,30 @@ export async function signInAs(email: string, password: string, allowed: Role[])
   return account;
 }
 
+/** Creates a customer account. Returns needsConfirmation = true when Supabase sends a confirmation email first. */
+export async function signUp(fullName: string, email: string, password: string) {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+    options: {
+      data: { full_name: fullName.trim() },
+      emailRedirectTo: `${window.location.origin}/login`,
+    },
+  });
+  if (error) throw new Error(error.message);
+  // Supabase returns a user with no identities when the email is already registered
+  if (data.user && data.user.identities?.length === 0) throw new Error("An account with this email already exists. Try logging in.");
+  return { needsConfirmation: !data.session };
+}
+
+/** Where to send someone after they log in, based on their role. */
+export function homeForRole(role: Role) {
+  if (role === "admin") return "/admin/orders";
+  if (role === "wholesale") return "/wholesale/catalog";
+  return "/account";
+}
+
 export async function signOut() {
   await getSupabase().auth.signOut();
 }

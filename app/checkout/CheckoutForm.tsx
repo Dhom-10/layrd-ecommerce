@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { FaCcMastercard, FaCcVisa, FaApplePay, FaGooglePay, FaPaypal } from "react-icons/fa";
 import { PiCreditCard, PiMapPinLine, PiStorefront } from "react-icons/pi";
 import { SiDoordash } from "react-icons/si";
 import OrderSummaryCard from "@/app/components/OrderSummaryCard";
 import { useCart } from "@/context/CartContext";
+import { useAccount } from "@/lib/auth";
 import { roundCents, shippingFor, TAX_RATE } from "@/lib/pricing";
 import { getSupabase } from "@/lib/supabase";
 import { DeliveryMethod } from "@/types/models";
@@ -39,6 +40,14 @@ export default function CheckoutForm({ stripeEnabled }: { stripeEnabled: boolean
   const [card, setCard] = useState({ number: "", expiry: "", cvc: "" });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { account } = useAccount();
+
+  // Logged-in customers: fill in what we already know (the order is also linked to their account)
+  useEffect(() => {
+    if (!account) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- prefill once the account has loaded
+    setForm((f) => ({ ...f, email: f.email || account.email, name: f.name || (account.fullName ?? "") }));
+  }, [account]);
 
   const subtotal = getTotal();
   const shipping = shippingFor(subtotal, delivery) ?? 0;
@@ -113,7 +122,14 @@ export default function CheckoutForm({ stripeEnabled }: { stripeEnabled: boolean
 
   return (
     <main className="flex-1 px-4 sm:px-[50px] py-6 max-w-[1440px] w-full mx-auto">
-      <Link href="/cart" className="underline tracking-[0.05em] text-ink">← Return to Cart</Link>
+      <div className="flex flex-wrap justify-between gap-2">
+        <Link href="/cart" className="underline tracking-[0.05em] text-ink">← Return to Cart</Link>
+        {account ? (
+          <span className="text-sm text-[#353535]">Logged in as {account.email}</span>
+        ) : (
+          <Link href="/login?next=/checkout" className="text-sm underline">Have an account? Log in</Link>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col lg:flex-row gap-10 lg:gap-[88px] items-start">
         <div className="w-full lg:flex-1 flex flex-col gap-8 max-w-[826px]">

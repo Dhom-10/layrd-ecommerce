@@ -1,133 +1,93 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { login } from "@/lib/data";
-import { CgMail, CgLock, CgEyeAlt, CgFacebook, CgInstagram } from "react-icons/cg";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
+import { PiArrowRight, PiAt, PiEye, PiEyeSlash, PiLockSimple } from "react-icons/pi";
+import { GlassBackground, GlassCard, PillInput } from "@/app/components/GlassAuth";
+import { homeForRole, signInAs } from "@/lib/auth";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
+  const [show, setShow] = useState(false);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const result = login(email, password);
-    if (result !== null) {
-      setMessage(`Welcome, ${result.name}`);
-      router.push("/products");
-    } else {
-      setMessage("Invalid email or password");
+    setError("");
+    setBusy(true);
+    try {
+      const account = await signInAs(email, password, ["customer", "wholesale", "admin"]);
+      // Go back to the page that sent them here (e.g. checkout), otherwise their home page
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next && next.startsWith("/") && !next.startsWith("//") ? next : homeForRole(account.role));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not log in.");
+      setBusy(false);
     }
   }
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center p-8 bg-gray-300">
-      {/* Background image placeholder */}
-      {/* <img src="/images/login-bg.jpg" className="absolute inset-0 w-full h-full object-cover" /> */}
-
-      <div className="relative z-10 flex gap-8 items-start">
-        {/* Left column: login card + wholesale card */}
-        <div className="flex flex-col gap-6">
-          {/* Login card */}
-          <div className="w-96 bg-white/40 backdrop-blur-md rounded-2xl p-8">
-            <div className="flex justify-between items-center mb-8">
-              <h1 className="text-2xl font-bold">Log in</h1>
-              <Link href="#" className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
-                {/* logo mark placeholder */}
-              </Link>
+    <GlassBackground image="/images/lotus-cheesecake.jpg">
+      <div className="flex-1 flex flex-col gap-3 max-w-[369px] w-full mx-auto">
+        <GlassCard className="px-8 py-6">
+          <form onSubmit={handleSubmit} className="flex flex-col">
+            <div className="flex items-start justify-between">
+              <h1 className="text-[28px] font-medium">Log in</h1>
+              <Link href="/signup" className="text-sm underline mt-2">Sign up</Link>
             </div>
 
-            <div className="flex gap-3 mb-6">
-              <CgFacebook className="text-xl" />
-              <CgInstagram className="text-xl" />
+            <div className="mt-8 flex flex-col gap-6">
+              <PillInput icon={<PiAt />} label="E-mail address" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <div className="relative">
+                <PillInput icon={<PiLockSimple />} label="Password" type={show ? "text" : "password"} required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? "Hide password" : "Show password"} className="absolute right-3 top-1/2 -translate-y-1/2 text-xl">
+                  {show ? <PiEyeSlash /> : <PiEye />}
+                </button>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="flex items-center gap-2 bg-white/60 rounded-full px-4 py-3">
-                <CgMail className="text-lg" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="E-mail address"
-                  className="bg-transparent flex-1 outline-none text-sm"
-                />
+            {error && <p role="alert" className="mt-4 text-sm bg-red-50/90 text-red-700 rounded px-3 py-2">{error}</p>}
+
+            <div className="mt-8 flex items-end justify-between">
+              <div className="text-xs">
+                <p>Freshly layered. Made to order.</p>
+                <p className="mt-2 text-ink/60">Cake in a can | Espresso shots</p>
               </div>
+              <button type="submit" disabled={busy} aria-label="Log in" className="size-[41px] rounded-full bg-gold flex items-center justify-center text-2xl hover:brightness-110 disabled:opacity-50">
+                <PiArrowRight />
+              </button>
+            </div>
+          </form>
+        </GlassCard>
 
-              <div className="flex items-center gap-2 bg-white/60 rounded-full px-4 py-3">
-                <CgLock className="text-lg" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="bg-transparent flex-1 outline-none text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((s) => !s)}
-                  aria-label="Toggle password visibility"
-                >
-                  <CgEyeAlt className="text-lg" />
-                </button>
-              </div>
-
-              <div className="flex justify-between items-end mt-2">
-                <div className="text-sm">
-                  <p>Freshly layered. Made to order.</p>
-                  <p className="text-gray-600">Cake in a can | Espresso shots</p>
-                </div>
-                <button
-                  type="submit"
-                  className="w-10 h-10 rounded-full bg-gold flex items-center justify-center flex-shrink-0"
-                  aria-label="Log in"
-                >
-                  →
-                </button>
-              </div>
-            </form>
-
-            {message && <p className="text-sm mt-4">{message}</p>}
-          </div>
-
-          {/* Wholesale card */}
-          <div className="w-96 bg-white/40 backdrop-blur-md rounded-2xl p-8">
-            <h2 className="text-xl font-bold mb-2">WHOLESALE</h2>
-            <p className="text-sm text-gray-700 mb-6">
-              Our wholesale portal is designed for businesses that want premium
-              layered desserts, delivered reliably and affordably.
-            </p>
-            <button className="w-full bg-gold text-black text-sm py-3 rounded-full">
-              Apply for Wholesale
-            </button>
-          </div>
-        </div>
-
-        {/* Right panel */}
-        <div className="w-80 h-[600px] bg-black/40 backdrop-blur-md rounded-2xl p-8 flex flex-col justify-between text-white">
-          <div>
-            <h2 className="text-3xl font-bold tracking-[3px]">LÄYRD</h2>
-            <p className="text-sm mt-1">layered desserts</p>
-          </div>
-
-          <div>
-            <p className="text-sm">Made fresh, layered daily.</p>
-            <p className="font-bold">Espresso shots &amp; event orders.</p>
-            <p className="text-xs mt-1 text-gray-300">CAKE IN A CAN</p>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="font-bold tracking-wide">LÄYRD</span>
-            <button className="bg-gold text-black text-sm px-4 py-2 rounded-full flex items-center gap-2">
-              Browse the shop →
-            </button>
-          </div>
-        </div>
+        <GlassCard className="px-6 py-5">
+          <h2 className="text-xl tracking-[0.05em]">WHOLESALE</h2>
+          <p className="mt-2 text-xs">Our wholesale portal is designed for businesses that want premium layered desserts, delivered reliably and affordably.</p>
+          <Link href="/wholesale/login" className="mt-5 flex h-[39px] items-center justify-center rounded-full bg-gold text-sm hover:brightness-110">
+            Wholesale partner log in
+          </Link>
+        </GlassCard>
       </div>
-    </main>
+
+      <GlassCard className="hidden md:flex flex-1 max-w-[379px] min-h-[678px] flex-col px-6 py-8 text-white">
+        <p className="text-[64px] leading-none tracking-[0.12em] text-ink">LÄYRD</p>
+        <p className="mt-3 text-lg">layered desserts</p>
+        <div className="mt-auto mb-auto">
+          <p className="text-lg">Made fresh, layered daily.</p>
+          <p className="text-lg text-ink">Espresso shots &amp; event orders.</p>
+          <p className="text-xs">CAKE IN A CAN</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-xl tracking-[0.1em] text-ink">LÄYRD</span>
+          <Link href="/products" className="flex h-[39px] items-center gap-6 rounded-full bg-gold pl-4 pr-3 text-ink text-sm">
+            Browse the shop <PiArrowRight className="text-xl" />
+          </Link>
+        </div>
+      </GlassCard>
+    </GlassBackground>
   );
 }
