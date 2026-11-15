@@ -25,7 +25,7 @@ export default function Header() {
   async function handleSignOut() {
     setAccountOpen(false);
     await signOut();
-    router.push("/");
+    router.push("/login");
   }
 
   return (
@@ -51,7 +51,7 @@ export default function Header() {
           </button>
 
           <Link
-            href="/"
+            href="/home"
             className="absolute left-1/2 -translate-x-1/2 text-[32px] sm:text-[48px] leading-none tracking-[0.12em] font-medium text-ink"
           >
             LÄYRD

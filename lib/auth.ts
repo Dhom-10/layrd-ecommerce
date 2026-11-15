@@ -65,7 +65,7 @@ export async function signUp(fullName: string, email: string, password: string) 
 export function homeForRole(role: Role) {
   if (role === "admin") return "/admin/orders";
   if (role === "wholesale") return "/wholesale/catalog";
-  return "/account";
+  return "/home";
 }
 
 export async function signOut() {

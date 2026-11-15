@@ -29,7 +29,7 @@ export default function SignUpPage() {
         setSentTo(form.email.trim());
         setBusy(false);
       } else {
-        router.push("/account");
+        router.push("/home");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create the account.");

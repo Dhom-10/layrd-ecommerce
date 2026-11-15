@@ -301,7 +301,7 @@ export default function AdminOrdersPage() {
                   ))}
                 </ul>
               )}
-              <Link href="/" className="mt-6 block text-sm text-gold underline">View store →</Link>
+              <Link href="/home" className="mt-6 block text-sm text-gold underline">View store →</Link>
             </aside>
           </div>
         </main>
