@@ -61,10 +61,12 @@ export default function CheckoutForm({ stripeEnabled }: { stripeEnabled: boolean
   function validateTestCard() {
     const digits = card.number.replace(/\s/g, "");
     if (digits !== TEST_CARD) return "Test mode: use the card 4242 4242 4242 4242.";
-    const match = card.expiry.match(/^(\d{2})\s*\/\s*(\d{2})$/);
-    if (!match || Number(match[1]) < 1 || Number(match[1]) > 12) return "Enter the expiry as MM/YY.";
-    const expires = new Date(2000 + Number(match[2]), Number(match[1])); // first day of the month after expiry
-    if (expires <= new Date()) return "This card has expired.";
+    // Accept MM/YY or MM/YYYY
+    const match = card.expiry.match(/^(\d{1,2})\s*\/\s*(\d{2}|\d{4})$/);
+    if (!match || Number(match[1]) < 1 || Number(match[1]) > 12) return "Enter the expiry as MM/YY, for example 12/28.";
+    const year = match[2].length === 2 ? 2000 + Number(match[2]) : Number(match[2]);
+    const expires = new Date(year, Number(match[1])); // first day of the month after expiry
+    if (expires <= new Date()) return `The date ${card.expiry} is in the past. Use a future date, for example 12/28.`;
     if (!/^\d{3,4}$/.test(card.cvc)) return "Enter the 3 or 4 digit security code.";
     return "";
   }
@@ -190,9 +192,9 @@ export default function CheckoutForm({ stripeEnabled }: { stripeEnabled: boolean
                   <strong>TEST MODE:</strong> no real money is charged. Use card 4242 4242 4242 4242, any future date and any CVC.
                 </p>
                 <div className="mt-4 grid sm:grid-cols-[1fr_190px_135px] gap-4">
-                  <Field label="CARD NUMBER" id="card" inputMode="numeric" autoComplete="cc-number" required value={card.number} onChange={(v) => setCard((c) => ({ ...c, number: v }))} placeholder="0000 0000 0000 0000" small />
-                  <Field label="EXPIRATION" id="exp" autoComplete="cc-exp" required value={card.expiry} onChange={(v) => setCard((c) => ({ ...c, expiry: v }))} placeholder="MM/YY" small />
-                  <Field label="SECURITY CODE" id="cvc" inputMode="numeric" autoComplete="cc-csc" required value={card.cvc} onChange={(v) => setCard((c) => ({ ...c, cvc: v }))} placeholder="CVC" small />
+                  <Field label="CARD NUMBER" id="card" inputMode="numeric" autoComplete="off" required value={card.number} onChange={(v) => setCard((c) => ({ ...c, number: v }))} placeholder="0000 0000 0000 0000" small />
+                  <Field label="EXPIRATION" id="exp" autoComplete="off" required value={card.expiry} onChange={(v) => setCard((c) => ({ ...c, expiry: formatExpiry(v) }))} placeholder="MM/YY" small />
+                  <Field label="SECURITY CODE" id="cvc" inputMode="numeric" autoComplete="off" required value={card.cvc} onChange={(v) => setCard((c) => ({ ...c, cvc: v }))} placeholder="CVC" small />
                 </div>
               </div>
             )}
@@ -234,6 +236,13 @@ export default function CheckoutForm({ stripeEnabled }: { stripeEnabled: boolean
       </form>
     </main>
   );
+}
+
+/** Adds the "/" automatically: "1228" -> "12/28" */
+function formatExpiry(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 6);
+  if (value.includes("/")) return value.replace(/[^\d/]/g, "").slice(0, 7);
+  return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
